@@ -1,9 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import DropdownListItem from './DropdownListItem';
 import { ItemSeparatorComponent, ListEmptyComponent } from '../Others';
 import { TFlatList } from 'src/types/index.types';
+const ITEM_HEIGHT = 45;
 
 const DropdownFlatList = ({
   options,
@@ -28,18 +29,36 @@ const DropdownFlatList = ({
 }: any) => {
   const flatlistRef = useRef<FlatList<TFlatList>>(null);
 
-  const scrollToItem = (index: number) => {
-    flatlistRef.current?.scrollToIndex({
-      index,
-      animated: true,
-    });
-  };
+  const scrollToItem = useCallback(
+    (index: number) => {
+      // check if options is populated before calling scrollToIndex
+      if (!options || options.length === 0) {
+        return;
+      }
 
+      // check if index is within bounds of options
+      if (index < 0 || index > options.length - 1) {
+        return;
+      }
+
+      try {
+        setTimeout(() => {
+          flatlistRef.current?.scrollToIndex({
+            index,
+            animated: true,
+          });
+        }, 500);
+      } catch (e) {
+        // console.log('scrollToItem error', e);
+      }
+    },
+    [options]
+  );
   useEffect(() => {
     if (listIndex.itemIndex >= 0) {
       scrollToItem(listIndex.itemIndex);
     }
-  }, [listIndex]);
+  }, [listIndex, scrollToItem]);
 
   return (
     <FlatList
@@ -80,11 +99,17 @@ const DropdownFlatList = ({
       }
       keyExtractor={(_item, index) => `Options${index}`}
       ref={flatlistRef}
-      onScrollToIndexFailed={({ index }) => {
-        setTimeout(() => {
-          scrollToItem(index);
-        }, 500);
-      }}
+      getItemLayout={(_data, index) => ({
+        length: ITEM_HEIGHT,
+        offset: ITEM_HEIGHT * index,
+        index,
+      })}
+      // onScrollToIndexFailed={({ index }) => {
+      //   //  stale closure that's referring to the old state causing app to crash without try catch in scrollToItem
+      //   setTimeout(() => {
+      //     scrollToItem(index);
+      //   }, 500);
+      // }}
       {...rest}
     />
   );

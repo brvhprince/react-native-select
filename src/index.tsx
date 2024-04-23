@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TouchableOpacity, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import Input from './components/Input';
 import CheckBox from './components/CheckBox';
 import Dropdown from './components/Dropdown/Dropdown';
@@ -417,6 +417,20 @@ export const DropdownSelect: React.FC<DropdownProps> = ({
           listIndex={listIndex}
           emptyListMessage={listControls?.emptyListMessage}
         />
+        {isMultiple && (
+          <TouchableOpacity
+            onPress={handleToggleModal}
+            style={[
+              styles.doneButton,
+              {
+                backgroundColor:
+                  selectedItems.length > 0 ? primary : colors.gray,
+              },
+            ]}
+          >
+            <Text style={styles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
+        )}
       </CustomModal>
     </>
   );
@@ -427,6 +441,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     flexDirection: 'row',
+  },
+  doneButton: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
+    borderRadius: 10,
+    padding: 8,
+  },
+  doneButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
